@@ -156,6 +156,49 @@
         .indicator-cell.status-modified::before {
             background-color: #f44336;
         }
+        .speech-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .speech-button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .speech-button:hover {
+            background-color: #1976D2;
+        }
+        .speech-button.listening {
+            background-color: #f44336;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .speech-textbox {
+            width: 100%;
+            min-height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .speech-status {
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +206,12 @@
     
     <button class="reset-button" onclick="resetStorage()">Reset All Changes</button>
     <button class="copy-button" onclick="showChanges()">Show Modified Cells</button>
+    
+    <div class="speech-container">
+        <button class="speech-button" id="speechButton" onclick="toggleSpeechRecognition()">Start Speech Recognition</button>
+        <div class="speech-status" id="speechStatus">Click the button to start speech recognition</div>
+        <textarea class="speech-textbox" id="speechText" placeholder="Recognized speech will appear here..." readonly></textarea>
+    </div>
     
     <div class="modal-backdrop" id="modalBackdrop"></div>
     <div class="changes-modal" id="changesModal">
@@ -249,6 +298,109 @@
             { english: "Spider Fang", russian: "Клык паука", ukrainian: "Ікло павука" },
             { english: "Feather", russian: "Перо", ukrainian: "Перо" }
         ];
+
+        // Speech Recognition Setup - moved to global scope
+        let recognition = null;
+        let isListening = false;
+        
+        function setupSpeechRecognition() {
+            try {
+                // Check browser support
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    document.getElementById('speechStatus').textContent = 'Speech recognition is not supported in this browser';
+                    document.getElementById('speechButton').disabled = true;
+                    return false;
+                }
+                
+                // Initialize the recognition object
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US'; // Default to English
+                recognition.maxAlternatives = 1;
+                
+                recognition.onstart = function() {
+                    isListening = true;
+                    document.getElementById('speechButton').classList.add('listening');
+                    document.getElementById('speechButton').textContent = 'Stop Speech Recognition';
+                    document.getElementById('speechStatus').textContent = 'Listening...';
+                    console.log('Speech recognition started');
+                };
+                
+                recognition.onend = function() {
+                    isListening = false;
+                    document.getElementById('speechButton').classList.remove('listening');
+                    document.getElementById('speechButton').textContent = 'Start Speech Recognition';
+                    document.getElementById('speechStatus').textContent = 'Speech recognition stopped';
+                    console.log('Speech recognition ended');
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    document.getElementById('speechStatus').textContent = `Error: ${event.error}. Try again or check microphone permissions.`;
+                    
+                    // If permission denied, provide instructions
+                    if (event.error === 'not-allowed') {
+                        document.getElementById('speechStatus').textContent = 'Microphone access denied. Please allow microphone access in your browser settings and try again.';
+                    }
+                };
+                
+                recognition.onresult = function(event) {
+                    console.log('Speech result received', event);
+                    const speechText = document.getElementById('speechText');
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    if (finalTranscript) {
+                        speechText.value += finalTranscript;
+                        console.log('Final transcript:', finalTranscript);
+                    }
+                    
+                    document.getElementById('speechStatus').textContent = interimTranscript ? 
+                        `Listening... (Interim: ${interimTranscript})` : 'Listening...';
+                };
+                
+                return true;
+            } catch (err) {
+                console.error('Error setting up speech recognition:', err);
+                document.getElementById('speechStatus').textContent = `Error initializing: ${err.message}`;
+                return false;
+            }
+        }
+        
+        function toggleSpeechRecognition() {
+            try {
+                if (!recognition) {
+                    if (!setupSpeechRecognition()) {
+                        return; // Setup failed
+                    }
+                }
+                
+                if (isListening) {
+                    recognition.stop();
+                    console.log('Stopping speech recognition');
+                } else {
+                    // Force a new instance to trigger permission request
+                    setupSpeechRecognition();
+                    recognition.start();
+                    console.log('Starting speech recognition');
+                }
+            } catch (err) {
+                console.error('Error toggling speech recognition:', err);
+                document.getElementById('speechStatus').textContent = `Error: ${err.message}`;
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.getElementById('translationTable');
@@ -352,6 +504,9 @@
                     });
                 });
             });
+            
+            // Setup speech recognition but don't start it automatically
+            setupSpeechRecognition();
         });
 
         function resetStorage() {
