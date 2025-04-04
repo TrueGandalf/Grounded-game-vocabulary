@@ -340,16 +340,21 @@
             // Make all cells editable except headers
             const cells = table.getElementsByTagName('td');
             Array.from(cells).forEach(cell => {
+                const cellId = `${cell.parentElement.rowIndex}-${cell.cellIndex}`;
+                const originalText = cell.textContent.trim();
+                
+                // Store original value first
+                cell.setAttribute('data-original', originalText);
+                
+                // Make cell editable
                 cell.classList.add('editable');
                 cell.contentEditable = true;
                 
                 // Add status indicator
                 const indicator = document.createElement('div');
                 indicator.classList.add('status-indicator');
-                cell.appendChild(indicator);
                 
-                // Check if cell has saved data
-                const cellId = `${cell.parentElement.rowIndex}-${cell.cellIndex}`;
+                // Check if we have saved data for this cell
                 if (savedData[cellId]) {
                     cell.textContent = savedData[cellId];
                     indicator.classList.add('status-modified');
@@ -357,21 +362,21 @@
                     indicator.classList.add('status-original');
                 }
                 
+                // Add the indicator to the cell
+                cell.appendChild(indicator);
+                
                 // Save on blur
                 cell.addEventListener('blur', function() {
                     const newValue = this.textContent.trim();
-                    const cellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
+                    const currentCellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
                     
                     if (newValue !== this.getAttribute('data-original')) {
-                        savedData[cellId] = newValue;
+                        savedData[currentCellId] = newValue;
                         localStorage.setItem(storageKey, JSON.stringify(savedData));
                         this.querySelector('.status-indicator').classList.remove('status-original');
                         this.querySelector('.status-indicator').classList.add('status-modified');
                     }
                 });
-                
-                // Store original value
-                cell.setAttribute('data-original', cell.textContent);
             });
         });
     </script>
