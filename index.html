@@ -56,11 +56,25 @@
         .hidden {
             display: none;
         }
+        .reset-button {
+            padding: 8px 16px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
 
     <h1>Grounded Items Translation</h1>
+    
+    <button class="reset-button" onclick="resetStorage()">Reset All Changes</button>
     
     <div class="search-container">
         <input type="text" class="search-input" placeholder="Search English..." data-column="0">
@@ -431,6 +445,31 @@
                 });
             });
         });
+
+        function resetStorage() {
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to reset all changes? This will restore all translations to their original values and cannot be undone.')) {
+                // Clear localStorage
+                localStorage.removeItem('groundedTranslations');
+                
+                // Reset all cells to their original values
+                const cells = document.getElementsByTagName('td');
+                Array.from(cells).forEach(cell => {
+                    const originalText = cell.getAttribute('data-original');
+                    cell.textContent = originalText;
+                    
+                    // Reset status indicator
+                    const indicator = cell.querySelector('.status-indicator');
+                    if (indicator) {
+                        indicator.classList.remove('status-modified');
+                        indicator.classList.add('status-original');
+                    }
+                });
+                
+                // Reload the page to ensure clean state
+                location.reload();
+            }
+        }
     </script>
 
 </body>
