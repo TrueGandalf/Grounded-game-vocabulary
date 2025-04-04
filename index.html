@@ -41,11 +41,31 @@
         .status-modified {
             background-color: #f44336;
         }
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <h1>Grounded Items Translation</h1>
+    
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search English..." data-column="0">
+        <input type="text" class="search-input" placeholder="Search Russian..." data-column="1">
+        <input type="text" class="search-input" placeholder="Search Ukrainian..." data-column="2">
+    </div>
     
     <table id="translationTable">
         <thead>
@@ -333,6 +353,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.getElementById('translationTable');
             const storageKey = 'groundedTranslations';
+            const searchInputs = document.querySelectorAll('.search-input');
             
             // Load saved data from localStorage
             let savedData = JSON.parse(localStorage.getItem(storageKey) || '{}');
@@ -384,6 +405,28 @@
                         this.querySelector('.status-indicator').classList.remove('status-original');
                         this.querySelector('.status-indicator').classList.add('status-modified');
                     }
+                });
+            });
+
+            // Add search functionality
+            searchInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const searchText = this.value.toLowerCase();
+                    const columnIndex = parseInt(this.dataset.column);
+                    
+                    // Get all rows except header
+                    const rows = Array.from(table.getElementsByTagName('tr')).slice(1);
+                    
+                    rows.forEach(row => {
+                        const cell = row.cells[columnIndex];
+                        const cellText = cell.textContent.toLowerCase();
+                        
+                        if (cellText.includes(searchText)) {
+                            row.classList.remove('hidden');
+                        } else {
+                            row.classList.add('hidden');
+                        }
+                    });
                 });
             });
         });
