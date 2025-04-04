@@ -109,6 +109,27 @@
             background-color: #f5f5f5;
             border-radius: 4px;
         }
+        .copyable-text {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+            transition: background-color 0.2s;
+        }
+        .copyable-text:hover {
+            background-color: #e0e0e0;
+        }
+        .copyable-text.copied {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .changes-row {
+            margin: 8px 0;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .changes-row:hover {
+            background-color: #f0f0f0;
+        }
         .close-modal {
             position: absolute;
             right: 10px;
@@ -147,7 +168,7 @@
     <div class="changes-modal" id="changesModal">
         <span class="close-modal" onclick="closeModal()">&times;</span>
         <h2>Modified Cells</h2>
-        <p>Copy these values to perform search and replace in your code:</p>
+        <p>Click on any text to copy it for search and replace operations:</p>
         <div class="changes-content" id="changesContent"></div>
     </div>
     
@@ -357,10 +378,40 @@
                         'ukrainian': 'Ukrainian'
                     }[language];
                     
-                    changes.push(`Row ${parseInt(rowIndex) + 1}, ${columnName} column:`);
-                    changes.push(`Original: "${originalText}"`);
-                    changes.push(`Modified: "${currentText}"`);
-                    changes.push('---');
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'changes-row';
+                    
+                    const header = document.createElement('div');
+                    header.textContent = `Row ${parseInt(rowIndex) + 1}, ${columnName} column:`;
+                    rowDiv.appendChild(header);
+                    
+                    const originalDiv = document.createElement('div');
+                    originalDiv.textContent = 'Original: ';
+                    const originalSpan = document.createElement('span');
+                    originalSpan.className = 'copyable-text';
+                    originalSpan.textContent = `"${originalText}"`;
+                    originalSpan.onclick = function() {
+                        copyText(this, originalText);
+                    };
+                    originalDiv.appendChild(originalSpan);
+                    rowDiv.appendChild(originalDiv);
+                    
+                    const modifiedDiv = document.createElement('div');
+                    modifiedDiv.textContent = 'Modified: ';
+                    const modifiedSpan = document.createElement('span');
+                    modifiedSpan.className = 'copyable-text';
+                    modifiedSpan.textContent = `"${currentText}"`;
+                    modifiedSpan.onclick = function() {
+                        copyText(this, currentText);
+                    };
+                    modifiedDiv.appendChild(modifiedSpan);
+                    rowDiv.appendChild(modifiedDiv);
+                    
+                    const separator = document.createElement('div');
+                    separator.textContent = '---';
+                    rowDiv.appendChild(separator);
+                    
+                    changes.push(rowDiv);
                 }
             });
             
@@ -369,9 +420,31 @@
                 return;
             }
             
-            document.getElementById('changesContent').textContent = changes.join('\n');
+            const changesContent = document.getElementById('changesContent');
+            changesContent.innerHTML = '';
+            changes.forEach(change => changesContent.appendChild(change));
+            
             document.getElementById('modalBackdrop').style.display = 'block';
             document.getElementById('changesModal').style.display = 'block';
+        }
+        
+        function copyText(element, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Remove copied class from all elements
+                document.querySelectorAll('.copyable-text').forEach(el => {
+                    el.classList.remove('copied');
+                });
+                
+                // Add copied class to clicked element
+                element.classList.add('copied');
+                
+                // Remove copied class after 1 second
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
         }
         
         function closeModal() {
