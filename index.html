@@ -117,8 +117,23 @@
             font-size: 20px;
         }
         .indicator-cell {
-            width: 30px;
+            width: 8px;
             text-align: center;
+            border: none;
+            padding: 0;
+        }
+        .indicator-cell::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .indicator-cell.status-original::before {
+            background-color: #4CAF50;
+        }
+        .indicator-cell.status-modified::before {
+            background-color: #f44336;
         }
     </style>
 </head>
@@ -145,10 +160,12 @@
     <table id="translationTable">
         <thead>
             <tr>
-                <th>English</th>
-                <th>Russian</th>
-                <th>Ukrainian</th>
                 <th></th>
+                <th>English</th>
+                <th></th>
+                <th>Russian</th>
+                <th></th>
+                <th>Ukrainian</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -224,14 +241,35 @@
             // Generate table rows
             translationData.forEach((item, rowIndex) => {
                 const row = document.createElement('tr');
+                // Store the row index in the row element for reference
+                row.setAttribute('data-row-index', rowIndex);
                 
                 // Create cells for each language
                 ['english', 'russian', 'ukrainian'].forEach((lang, colIndex) => {
+                    // Add indicator cell first
+                    const indicatorCell = document.createElement('td');
+                    indicatorCell.classList.add('indicator-cell');
+                    
+                    // Check if this specific cell has saved data
+                    const cellId = `${rowIndex}-${lang}`;
+                    if (savedData[cellId]) {
+                        indicatorCell.classList.add('status-modified');
+                    } else {
+                        indicatorCell.classList.add('status-original');
+                    }
+                    
+                    row.appendChild(indicatorCell);
+                    
+                    // Add content cell
                     const cell = document.createElement('td');
                     cell.classList.add('editable');
                     cell.contentEditable = true;
                     
-                    const cellId = `${rowIndex}-${colIndex}`;
+                    // Store the language type and row index in the cell for reference
+                    cell.setAttribute('data-language', lang);
+                    cell.setAttribute('data-row-index', rowIndex);
+                    
+                    // Use a more specific cell ID that includes both row index and language
                     const originalText = item[lang];
                     
                     // Store original value
@@ -250,8 +288,10 @@
                     
                     cell.addEventListener('blur', function() {
                         const newValue = this.textContent.trim();
-                        const currentCellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
-                        const indicator = this.parentElement.querySelector('.status-indicator');
+                        const rowIndex = this.getAttribute('data-row-index');
+                        const language = this.getAttribute('data-language');
+                        const currentCellId = `${rowIndex}-${language}`;
+                        const indicator = this.previousElementSibling;
                         
                         if (newValue !== this.getAttribute('data-original')) {
                             savedData[currentCellId] = newValue;
@@ -268,26 +308,6 @@
                     
                     row.appendChild(cell);
                 });
-                
-                // Add indicator cell
-                const indicatorCell = document.createElement('td');
-                indicatorCell.classList.add('indicator-cell');
-                const indicator = document.createElement('div');
-                indicator.classList.add('status-indicator');
-                
-                // Check if any cell in this row has saved data
-                const hasModifiedCells = ['english', 'russian', 'ukrainian'].some((_, colIndex) => {
-                    return savedData[`${rowIndex}-${colIndex}`];
-                });
-                
-                if (hasModifiedCells) {
-                    indicator.classList.add('status-modified');
-                } else {
-                    indicator.classList.add('status-original');
-                }
-                
-                indicatorCell.appendChild(indicator);
-                row.appendChild(indicatorCell);
                 
                 tbody.appendChild(row);
             });
@@ -324,15 +344,19 @@
             let changes = [];
             
             Array.from(cells).forEach(cell => {
-                const indicator = cell.parentElement.querySelector('.status-indicator');
+                const indicator = cell.previousElementSibling;
                 if (indicator.classList.contains('status-modified')) {
                     const originalText = cell.getAttribute('data-original');
                     const currentText = cell.textContent.trim();
-                    const rowIndex = cell.parentElement.rowIndex;
-                    const columnIndex = cell.cellIndex;
-                    const columnName = ['English', 'Russian', 'Ukrainian'][columnIndex];
+                    const rowIndex = cell.getAttribute('data-row-index');
+                    const language = cell.getAttribute('data-language');
+                    const columnName = {
+                        'english': 'English',
+                        'russian': 'Russian',
+                        'ukrainian': 'Ukrainian'
+                    }[language];
                     
-                    changes.push(`Row ${rowIndex}, ${columnName} column:`);
+                    changes.push(`Row ${parseInt(rowIndex) + 1}, ${columnName} column:`);
                     changes.push(`Original: "${originalText}"`);
                     changes.push(`Modified: "${currentText}"`);
                     changes.push('---');
