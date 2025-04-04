@@ -14,7 +14,6 @@
             padding: 8px 12px;
             text-align: left;
             border: 1px solid #ddd;
-            position: relative;
         }
         th {
             background-color: #f2f2f2;
@@ -22,19 +21,15 @@
         .editable {
             cursor: pointer;
             transition: background-color 0.2s;
-            padding-left: 20px;
         }
         .editable:hover {
             background-color: #f8f8f8;
         }
         .status-indicator {
-            position: absolute;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
             width: 8px;
             height: 8px;
             border-radius: 50%;
+            display: inline-block;
         }
         .status-original {
             background-color: #4CAF50;
@@ -68,13 +63,78 @@
         .reset-button:hover {
             background-color: #d32f2f;
         }
+        .copy-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            margin-left: 10px;
+        }
+        .copy-button:hover {
+            background-color: #45a049;
+        }
+        .changes-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        .changes-content {
+            font-family: monospace;
+            white-space: pre;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        .close-modal {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .indicator-cell {
+            width: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-
     <h1>Grounded Items Translation</h1>
     
     <button class="reset-button" onclick="resetStorage()">Reset All Changes</button>
+    <button class="copy-button" onclick="showChanges()">Show Modified Cells</button>
+    
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="changes-modal" id="changesModal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2>Modified Cells</h2>
+        <p>Copy these values to perform search and replace in your code:</p>
+        <div class="changes-content" id="changesContent"></div>
+    </div>
     
     <div class="search-container">
         <input type="text" class="search-input" placeholder="Search English..." data-column="0">
@@ -88,339 +148,148 @@
                 <th>English</th>
                 <th>Russian</th>
                 <th>Ukrainian</th>
+                <th></th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>Ant</td>
-                <td>Муравей</td>
-                <td>Мураха</td>
-            </tr>
-            <tr>
-                <td>Spider</td>
-                <td>Паук</td>
-                <td>Павук</td>
-            </tr>
-            <tr>
-                <td>Ladybug</td>
-                <td>Божья коровка</td>
-                <td>Сонечко</td>
-            </tr>
-            <tr>
-                <td>Weevil</td>
-                <td>Долгоносик</td>
-                <td>Довгоносик</td>
-            </tr>
-            <tr>
-                <td>Beetle</td>
-                <td>Жук-олень</td>
-                <td>Жук-олень</td>
-            </tr>
-            <tr>
-                <td>Moth</td>
-                <td>Моль</td>
-                <td>Міль</td>
-            </tr>
-            <tr>
-                <td>Stinkbug</td>
-                <td>Клоп-вонючка</td>
-                <td>Клоп-вонючка</td>
-            </tr>
-            <tr>
-                <td>Bombardier Beetle</td>
-                <td>Бомбардир</td>
-                <td>Бомбардир</td>
-            </tr>
-            <tr>
-                <td>Mosquito</td>
-                <td>Комар</td>
-                <td>Комар</td>
-            </tr>
-            <tr>
-                <td>Larva</td>
-                <td>Личинка</td>
-                <td>Личинка</td>
-            </tr>
-            <tr>
-                <td>Grub</td>
-                <td>Личинка жука</td>
-                <td>Хробак</td>
-            </tr>
-            <tr>
-                <td>Bee</td>
-                <td>Пчела</td>
-                <td>Бджола</td>
-            </tr>
-            <tr>
-                <td>Dragonfly</td>
-                <td>Стрекоза</td>
-                <td>Бабка</td>
-            </tr>
-            <tr>
-                <td>Scarab</td>
-                <td>Скарабей</td>
-                <td>Скарабей</td>
-            </tr>
-            <tr>
-                <td>Tarantula</td>
-                <td>Тарантул</td>
-                <td>Тарантул</td>
-            </tr>
-            <tr>
-                <td>Spiderling</td>
-                <td>Паучок</td>
-                <td>Павучок</td>
-            </tr>
-            <tr>
-                <td>Acorn Shell</td>
-                <td>Скорлупа желудя</td>
-                <td>Шкаралупа жолудя</td>
-            </tr>
-            <tr>
-                <td>Antenna</td>
-                <td>Усик</td>
-                <td>Антена</td>
-            </tr>
-            <tr>
-                <td>Beehive</td>
-                <td>Улей</td>
-                <td>Вулик</td>
-            </tr>
-            <tr>
-                <td>Sap</td>
-                <td>Сок</td>
-                <td>Сік</td>
-            </tr>
-            <tr>
-                <td>Mushroom</td>
-                <td>Гриб</td>
-                <td>Гриб</td>
-            </tr>
-            <tr>
-                <td>Clovers</td>
-                <td>Клевер</td>
-                <td>Конюшина</td>
-            </tr>
-            <tr>
-                <td>Dry Grass Chunk</td>
-                <td>Кучка сухой травы</td>
-                <td>Купина сухої трави</td>
-            </tr>
-            <tr>
-                <td>Sprig</td>
-                <td>Веточка</td>
-                <td>Гілочка</td>
-            </tr>
-            <tr>
-                <td>Pebble</td>
-                <td>Камешек</td>
-                <td>Галька</td>
-            </tr>
-            <tr>
-                <td>Fiber</td>
-                <td>Волокно</td>
-                <td>Волокно</td>
-            </tr>
-            <tr>
-                <td>Sap</td>
-                <td>Сок</td>
-                <td>Сік</td>
-            </tr>
-            <tr>
-                <td>Acorn</td>
-                <td>Желудь</td>
-                <td>Жолудь</td>
-            </tr>
-            <tr>
-                <td>Dew Drop</td>
-                <td>Капля росы</td>
-                <td>Крапля роси</td>
-            </tr>
-            <tr>
-                <td>Workbench</td>
-                <td>Верстак</td>
-                <td>Верстат</td>
-            </tr>
-            <tr>
-                <td>Storage Chest</td>
-                <td>Сундук для хранения</td>
-                <td>Скриня для зберігання</td>
-            </tr>
-            <tr>
-                <td>Grill</td>
-                <td>Гриль</td>
-                <td>Гриль</td>
-            </tr>
-            <tr>
-                <td>Torch</td>
-                <td>Факел</td>
-                <td>Смолоскип</td>
-            </tr>
-            <tr>
-                <td>Club</td>
-                <td>Дубина</td>
-                <td>Дубина</td>
-            </tr>
-            <tr>
-                <td>Axe</td>
-                <td>Топор</td>
-                <td>Сокира</td>
-            </tr>
-            <tr>
-                <td>Hammer</td>
-                <td>Молот</td>
-                <td>Молот</td>
-            </tr>
-            <tr>
-                <td>Bow</td>
-                <td>Лук</td>
-                <td>Лук</td>
-            </tr>
-            <tr>
-                <td>Arrow</td>
-                <td>Стрела</td>
-                <td>Стріла</td>
-            </tr>
-            <tr>
-                <td>Crossbow</td>
-                <td>Арбалет</td>
-                <td>Арбалет</td>
-            </tr>
-            <tr>
-                <td>Slingshot</td>
-                <td>Рогатка</td>
-                <td>Рогатка</td>
-            </tr>
-            <tr>
-                <td>Shield</td>
-                <td>Щит</td>
-                <td>Щит</td>
-            </tr>
-            <tr>
-                <td>Insect Hammer</td>
-                <td>Молот для насекомых</td>
-                <td>Молоток для комах</td>
-            </tr>
-            <tr>
-                <td>Insect Bow</td>
-                <td>Лук для насекомых</td>
-                <td>Лук для комах</td>
-            </tr>
-            <tr>
-                <td>Insect Crossbow</td>
-                <td>Арбалет для насекомых</td>
-                <td>Арбалет для комах</td>
-            </tr>
-            <tr>
-                <td>Acorn Armor</td>
-                <td>Броня из желудей</td>
-                <td>Броня з жолудів</td>
-            </tr>
-            <tr>
-                <td>Ladybug Armor</td>
-                <td>Броня из божьих коровок</td>
-                <td>Броня з сонечок</td>
-            </tr>
-            <tr>
-                <td>Ant Armor</td>
-                <td>Броня из муравьёв</td>
-                <td>Броня з мурах</td>
-            </tr>
-            <tr>
-                <td>Bee Armor</td>
-                <td>Броня из пчёл</td>
-                <td>Броня з бджіл</td>
-            </tr>
-            <tr>
-                <td>Spider Armor</td>
-                <td>Броня из пауков</td>
-                <td>Броня з павуків</td>
-            </tr>
-            <tr>
-                <td>Canteen</td>
-                <td>Фляжка</td>
-                <td>Фляжка</td>
-            </tr>
-            <tr>
-                <td>Bandage</td>
-                <td>Бинт</td>
-                <td>Бинт</td>
-            </tr>
-            <tr>
-                <td>Antlion</td>
-                <td>Муравьиный лев</td>
-                <td>Мурашкоїд</td>
-            </tr>
-            <tr>
-                <td>Spider Fang</td>
-                <td>Клык паука</td>
-                <td>Ікло павука</td>
-            </tr>
-            <tr>
-                <td>Feather</td>
-                <td>Перо</td>
-                <td>Перо</td>
-            </tr>
-        </tbody>
+        <tbody></tbody>
     </table>
 
     <script>
+        // Translation data
+        const translationData = [
+            { english: "Ant", russian: "Муравей", ukrainian: "Мураха" },
+            { english: "Spider", russian: "Паук", ukrainian: "Павук" },
+            { english: "Ladybug", russian: "Божья коровка", ukrainian: "Сонечко" },
+            { english: "Weevil", russian: "Долгоносик", ukrainian: "Довгоносик" },
+            { english: "Beetle", russian: "Жук-олень", ukrainian: "Жук-олень" },
+            { english: "Moth", russian: "Моль", ukrainian: "Міль" },
+            { english: "Stinkbug", russian: "Клоп-вонючка", ukrainian: "Клоп-вонючка" },
+            { english: "Bombardier Beetle", russian: "Бомбардир", ukrainian: "Бомбардир" },
+            { english: "Mosquito", russian: "Комар", ukrainian: "Комар" },
+            { english: "Larva", russian: "Личинка", ukrainian: "Личинка" },
+            { english: "Grub", russian: "Личинка жука", ukrainian: "Хробак" },
+            { english: "Bee", russian: "Пчела", ukrainian: "Бджола" },
+            { english: "Dragonfly", russian: "Стрекоза", ukrainian: "Бабка" },
+            { english: "Scarab", russian: "Скарабей", ukrainian: "Скарабей" },
+            { english: "Tarantula", russian: "Тарантул", ukrainian: "Тарантул" },
+            { english: "Spiderling", russian: "Паучок", ukrainian: "Павучок" },
+            { english: "Acorn Shell", russian: "Скорлупа желудя", ukrainian: "Шкаралупа жолудя" },
+            { english: "Antenna", russian: "Усик", ukrainian: "Антена" },
+            { english: "Beehive", russian: "Улей", ukrainian: "Вулик" },
+            { english: "Sap", russian: "Сок", ukrainian: "Сік" },
+            { english: "Mushroom", russian: "Гриб", ukrainian: "Гриб" },
+            { english: "Clovers", russian: "Клевер", ukrainian: "Конюшина" },
+            { english: "Dry Grass Chunk", russian: "Кучка сухой травы", ukrainian: "Купина сухої трави" },
+            { english: "Sprig", russian: "Веточка", ukrainian: "Гілочка" },
+            { english: "Pebble", russian: "Камешек", ukrainian: "Галька" },
+            { english: "Fiber", russian: "Волокно", ukrainian: "Волокно" },
+            { english: "Acorn", russian: "Желудь", ukrainian: "Жолудь" },
+            { english: "Dew Drop", russian: "Капля росы", ukrainian: "Крапля роси" },
+            { english: "Workbench", russian: "Верстак", ukrainian: "Верстат" },
+            { english: "Storage Chest", russian: "Сундук для хранения", ukrainian: "Скриня для зберігання" },
+            { english: "Grill", russian: "Гриль", ukrainian: "Гриль" },
+            { english: "Torch", russian: "Факел", ukrainian: "Смолоскип" },
+            { english: "Club", russian: "Дубина", ukrainian: "Дубина" },
+            { english: "Axe", russian: "Топор", ukrainian: "Сокира" },
+            { english: "Hammer", russian: "Молот", ukrainian: "Молот" },
+            { english: "Bow", russian: "Лук", ukrainian: "Лук" },
+            { english: "Arrow", russian: "Стрела", ukrainian: "Стріла" },
+            { english: "Crossbow", russian: "Арбалет", ukrainian: "Арбалет" },
+            { english: "Slingshot", russian: "Рогатка", ukrainian: "Рогатка" },
+            { english: "Shield", russian: "Щит", ukrainian: "Щит" },
+            { english: "Insect Hammer", russian: "Молот для насекомых", ukrainian: "Молоток для комах" },
+            { english: "Insect Bow", russian: "Лук для насекомых", ukrainian: "Лук для комах" },
+            { english: "Insect Crossbow", russian: "Арбалет для насекомых", ukrainian: "Арбалет для комах" },
+            { english: "Acorn Armor", russian: "Броня из желудей", ukrainian: "Броня з жолудів" },
+            { english: "Ladybug Armor", russian: "Броня из божьих коровок", ukrainian: "Броня з сонечок" },
+            { english: "Ant Armor", russian: "Броня из муравьёв", ukrainian: "Броня з мурах" },
+            { english: "Bee Armor", russian: "Броня из пчёл", ukrainian: "Броня з бджіл" },
+            { english: "Spider Armor", russian: "Броня из пауков", ukrainian: "Броня з павуків" },
+            { english: "Canteen", russian: "Фляжка", ukrainian: "Фляжка" },
+            { english: "Bandage", russian: "Бинт", ukrainian: "Бинт" },
+            { english: "Antlion", russian: "Муравьиный лев", ukrainian: "Мурашкоїд" },
+            { english: "Spider Fang", russian: "Клык паука", ukrainian: "Ікло павука" },
+            { english: "Feather", russian: "Перо", ukrainian: "Перо" }
+        ];
+
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.getElementById('translationTable');
+            const tbody = table.querySelector('tbody');
             const storageKey = 'groundedTranslations';
             const searchInputs = document.querySelectorAll('.search-input');
             
             // Load saved data from localStorage
             let savedData = JSON.parse(localStorage.getItem(storageKey) || '{}');
             
-            // Make all cells editable except headers
-            const cells = table.getElementsByTagName('td');
-            Array.from(cells).forEach(cell => {
-                const cellId = `${cell.parentElement.rowIndex}-${cell.cellIndex}`;
-                const originalText = cell.textContent.trim();
+            // Generate table rows
+            translationData.forEach((item, rowIndex) => {
+                const row = document.createElement('tr');
                 
-                // Store original value first
-                cell.setAttribute('data-original', originalText);
+                // Create cells for each language
+                ['english', 'russian', 'ukrainian'].forEach((lang, colIndex) => {
+                    const cell = document.createElement('td');
+                    cell.classList.add('editable');
+                    cell.contentEditable = true;
+                    
+                    const cellId = `${rowIndex}-${colIndex}`;
+                    const originalText = item[lang];
+                    
+                    // Store original value
+                    cell.setAttribute('data-original', originalText);
+                    
+                    // Set cell content
+                    cell.textContent = savedData[cellId] || originalText;
+                    
+                    // Add event listeners
+                    cell.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
+                    
+                    cell.addEventListener('blur', function() {
+                        const newValue = this.textContent.trim();
+                        const currentCellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
+                        const indicator = this.parentElement.querySelector('.status-indicator');
+                        
+                        if (newValue !== this.getAttribute('data-original')) {
+                            savedData[currentCellId] = newValue;
+                            localStorage.setItem(storageKey, JSON.stringify(savedData));
+                            indicator.classList.remove('status-original');
+                            indicator.classList.add('status-modified');
+                        } else {
+                            delete savedData[currentCellId];
+                            localStorage.setItem(storageKey, JSON.stringify(savedData));
+                            indicator.classList.remove('status-modified');
+                            indicator.classList.add('status-original');
+                        }
+                    });
+                    
+                    row.appendChild(cell);
+                });
                 
-                // Make cell editable
-                cell.classList.add('editable');
-                cell.contentEditable = true;
-                
-                // Add status indicator
+                // Add indicator cell
+                const indicatorCell = document.createElement('td');
+                indicatorCell.classList.add('indicator-cell');
                 const indicator = document.createElement('div');
                 indicator.classList.add('status-indicator');
                 
-                // Check if we have saved data for this cell
-                if (savedData[cellId]) {
-                    cell.textContent = savedData[cellId];
+                // Check if any cell in this row has saved data
+                const hasModifiedCells = ['english', 'russian', 'ukrainian'].some((_, colIndex) => {
+                    return savedData[`${rowIndex}-${colIndex}`];
+                });
+                
+                if (hasModifiedCells) {
                     indicator.classList.add('status-modified');
                 } else {
                     indicator.classList.add('status-original');
                 }
                 
-                // Add the indicator to the cell
-                cell.appendChild(indicator);
+                indicatorCell.appendChild(indicator);
+                row.appendChild(indicatorCell);
                 
-                // Handle Enter key press
-                cell.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault(); // Prevent new line
-                        this.blur(); // Remove focus from the cell
-                    }
-                });
-                
-                // Save on blur
-                cell.addEventListener('blur', function() {
-                    const newValue = this.textContent.trim();
-                    const currentCellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
-                    
-                    if (newValue !== this.getAttribute('data-original')) {
-                        savedData[currentCellId] = newValue;
-                        localStorage.setItem(storageKey, JSON.stringify(savedData));
-                        this.querySelector('.status-indicator').classList.remove('status-original');
-                        this.querySelector('.status-indicator').classList.add('status-modified');
-                    }
-                });
+                tbody.appendChild(row);
             });
 
             // Add search functionality
@@ -429,10 +298,7 @@
                     const searchText = this.value.toLowerCase();
                     const columnIndex = parseInt(this.dataset.column);
                     
-                    // Get all rows except header
-                    const rows = Array.from(table.getElementsByTagName('tr')).slice(1);
-                    
-                    rows.forEach(row => {
+                    Array.from(tbody.getElementsByTagName('tr')).forEach(row => {
                         const cell = row.cells[columnIndex];
                         const cellText = cell.textContent.toLowerCase();
                         
@@ -447,30 +313,48 @@
         });
 
         function resetStorage() {
-            // Show confirmation dialog
             if (confirm('Are you sure you want to reset all changes? This will restore all translations to their original values and cannot be undone.')) {
-                // Clear localStorage
                 localStorage.removeItem('groundedTranslations');
-                
-                // Reset all cells to their original values
-                const cells = document.getElementsByTagName('td');
-                Array.from(cells).forEach(cell => {
-                    const originalText = cell.getAttribute('data-original');
-                    cell.textContent = originalText;
-                    
-                    // Reset status indicator
-                    const indicator = cell.querySelector('.status-indicator');
-                    if (indicator) {
-                        indicator.classList.remove('status-modified');
-                        indicator.classList.add('status-original');
-                    }
-                });
-                
-                // Reload the page to ensure clean state
                 location.reload();
             }
         }
-    </script>
 
+        function showChanges() {
+            const cells = document.getElementsByClassName('editable');
+            let changes = [];
+            
+            Array.from(cells).forEach(cell => {
+                const indicator = cell.parentElement.querySelector('.status-indicator');
+                if (indicator.classList.contains('status-modified')) {
+                    const originalText = cell.getAttribute('data-original');
+                    const currentText = cell.textContent.trim();
+                    const rowIndex = cell.parentElement.rowIndex;
+                    const columnIndex = cell.cellIndex;
+                    const columnName = ['English', 'Russian', 'Ukrainian'][columnIndex];
+                    
+                    changes.push(`Row ${rowIndex}, ${columnName} column:`);
+                    changes.push(`Original: "${originalText}"`);
+                    changes.push(`Modified: "${currentText}"`);
+                    changes.push('---');
+                }
+            });
+            
+            if (changes.length === 0) {
+                alert('No modified cells found!');
+                return;
+            }
+            
+            document.getElementById('changesContent').textContent = changes.join('\n');
+            document.getElementById('modalBackdrop').style.display = 'block';
+            document.getElementById('changesModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('modalBackdrop').style.display = 'none';
+            document.getElementById('changesModal').style.display = 'none';
+        }
+        
+        document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+    </script>
 </body>
 </html>
