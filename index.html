@@ -365,6 +365,14 @@
                 // Add the indicator to the cell
                 cell.appendChild(indicator);
                 
+                // Handle Enter key press
+                cell.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent new line
+                        this.blur(); // Remove focus from the cell
+                    }
+                });
+                
                 // Save on blur
                 cell.addEventListener('blur', function() {
                     const newValue = this.textContent.trim();
