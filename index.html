@@ -199,6 +199,49 @@
             font-size: 0.9em;
             color: #666;
         }
+        .language-selector {
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            width: 250px;
+        }
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .lang-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        .lang-button.en-US {
+            background-color: #2196F3;
+        }
+        .lang-button.ru-RU {
+            background-color: #4CAF50;
+        }
+        .lang-button.uk-UA {
+            background-color: #FFC107;
+            color: #333;
+        }
+        .lang-button:hover {
+            opacity: 0.9;
+        }
+        .lang-button.listening {
+            animation: pulse 1.5s infinite;
+        }
+        .audio-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -208,7 +251,151 @@
     <button class="copy-button" onclick="showChanges()">Show Modified Cells</button>
     
     <div class="speech-container">
-        <button class="speech-button" id="speechButton" onclick="toggleSpeechRecognition()">Start Speech Recognition</button>
+        <div class="audio-controls">
+            <button class="speech-button" id="speechButton" onclick="toggleAllRecognition()">Start All Recognition</button>
+            <button class="speech-button" style="background-color: #f44336;" onclick="stopAllRecognition()">Stop All</button>
+        </div>
+        
+        <div class="language-buttons">
+            <button class="lang-button en-US" id="enButton" onclick="toggleSingleLanguage('en-US')">English</button>
+            <button class="lang-button ru-RU" id="ruButton" onclick="toggleSingleLanguage('ru-RU')">Russian</button>
+            <button class="lang-button uk-UA" id="ukButton" onclick="toggleSingleLanguage('uk-UA')">Ukrainian</button>
+        </div>
+        
+        <select id="languageSelector" class="language-selector" onchange="changeLanguage()">
+            <option value="af-ZA">Afrikaans (South Africa)</option>
+            <option value="am-ET">Amharic (Ethiopia)</option>
+            <option value="ar-AE">Arabic (UAE)</option>
+            <option value="ar-BH">Arabic (Bahrain)</option>
+            <option value="ar-DZ">Arabic (Algeria)</option>
+            <option value="ar-EG">Arabic (Egypt)</option>
+            <option value="ar-IQ">Arabic (Iraq)</option>
+            <option value="ar-JO">Arabic (Jordan)</option>
+            <option value="ar-KW">Arabic (Kuwait)</option>
+            <option value="ar-LB">Arabic (Lebanon)</option>
+            <option value="ar-MA">Arabic (Morocco)</option>
+            <option value="ar-OM">Arabic (Oman)</option>
+            <option value="ar-QA">Arabic (Qatar)</option>
+            <option value="ar-SA">Arabic (Saudi Arabia)</option>
+            <option value="ar-TN">Arabic (Tunisia)</option>
+            <option value="az-AZ">Azerbaijani (Azerbaijan)</option>
+            <option value="bg-BG">Bulgarian (Bulgaria)</option>
+            <option value="bn-BD">Bengali (Bangladesh)</option>
+            <option value="bn-IN">Bengali (India)</option>
+            <option value="ca-ES">Catalan (Spain)</option>
+            <option value="cs-CZ">Czech (Czech Republic)</option>
+            <option value="da-DK">Danish (Denmark)</option>
+            <option value="de-AT">German (Austria)</option>
+            <option value="de-CH">German (Switzerland)</option>
+            <option value="de-DE">German (Germany)</option>
+            <option value="el-GR">Greek (Greece)</option>
+            <option value="en-AU">English (Australia)</option>
+            <option value="en-CA">English (Canada)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="en-GH">English (Ghana)</option>
+            <option value="en-IE">English (Ireland)</option>
+            <option value="en-IN">English (India)</option>
+            <option value="en-KE">English (Kenya)</option>
+            <option value="en-NG">English (Nigeria)</option>
+            <option value="en-NZ">English (New Zealand)</option>
+            <option value="en-PH">English (Philippines)</option>
+            <option value="en-TZ">English (Tanzania)</option>
+            <option value="en-US" selected>English (US)</option>
+            <option value="en-ZA">English (South Africa)</option>
+            <option value="es-AR">Spanish (Argentina)</option>
+            <option value="es-BO">Spanish (Bolivia)</option>
+            <option value="es-CL">Spanish (Chile)</option>
+            <option value="es-CO">Spanish (Colombia)</option>
+            <option value="es-CR">Spanish (Costa Rica)</option>
+            <option value="es-DO">Spanish (Dominican Republic)</option>
+            <option value="es-EC">Spanish (Ecuador)</option>
+            <option value="es-ES">Spanish (Spain)</option>
+            <option value="es-GT">Spanish (Guatemala)</option>
+            <option value="es-HN">Spanish (Honduras)</option>
+            <option value="es-MX">Spanish (Mexico)</option>
+            <option value="es-NI">Spanish (Nicaragua)</option>
+            <option value="es-PA">Spanish (Panama)</option>
+            <option value="es-PE">Spanish (Peru)</option>
+            <option value="es-PR">Spanish (Puerto Rico)</option>
+            <option value="es-PY">Spanish (Paraguay)</option>
+            <option value="es-SV">Spanish (El Salvador)</option>
+            <option value="es-US">Spanish (US)</option>
+            <option value="es-UY">Spanish (Uruguay)</option>
+            <option value="es-VE">Spanish (Venezuela)</option>
+            <option value="et-EE">Estonian (Estonia)</option>
+            <option value="eu-ES">Basque (Spain)</option>
+            <option value="fa-IR">Persian (Iran)</option>
+            <option value="fi-FI">Finnish (Finland)</option>
+            <option value="fil-PH">Filipino (Philippines)</option>
+            <option value="fr-BE">French (Belgium)</option>
+            <option value="fr-CA">French (Canada)</option>
+            <option value="fr-CH">French (Switzerland)</option>
+            <option value="fr-FR">French (France)</option>
+            <option value="gl-ES">Galician (Spain)</option>
+            <option value="gu-IN">Gujarati (India)</option>
+            <option value="he-IL">Hebrew (Israel)</option>
+            <option value="hi-IN">Hindi (India)</option>
+            <option value="hr-HR">Croatian (Croatia)</option>
+            <option value="hu-HU">Hungarian (Hungary)</option>
+            <option value="hy-AM">Armenian (Armenia)</option>
+            <option value="id-ID">Indonesian (Indonesia)</option>
+            <option value="is-IS">Icelandic (Iceland)</option>
+            <option value="it-CH">Italian (Switzerland)</option>
+            <option value="it-IT">Italian (Italy)</option>
+            <option value="ja-JP">Japanese (Japan)</option>
+            <option value="jv-ID">Javanese (Indonesia)</option>
+            <option value="ka-GE">Georgian (Georgia)</option>
+            <option value="kk-KZ">Kazakh (Kazakhstan)</option>
+            <option value="km-KH">Khmer (Cambodia)</option>
+            <option value="kn-IN">Kannada (India)</option>
+            <option value="ko-KR">Korean (South Korea)</option>
+            <option value="lo-LA">Lao (Laos)</option>
+            <option value="lt-LT">Lithuanian (Lithuania)</option>
+            <option value="lv-LV">Latvian (Latvia)</option>
+            <option value="mk-MK">Macedonian (North Macedonia)</option>
+            <option value="ml-IN">Malayalam (India)</option>
+            <option value="mn-MN">Mongolian (Mongolia)</option>
+            <option value="mr-IN">Marathi (India)</option>
+            <option value="ms-MY">Malay (Malaysia)</option>
+            <option value="mt-MT">Maltese (Malta)</option>
+            <option value="my-MM">Burmese (Myanmar)</option>
+            <option value="nb-NO">Norwegian Bokmål (Norway)</option>
+            <option value="ne-NP">Nepali (Nepal)</option>
+            <option value="nl-BE">Dutch (Belgium)</option>
+            <option value="nl-NL">Dutch (Netherlands)</option>
+            <option value="pa-IN">Punjabi (India)</option>
+            <option value="pl-PL">Polish (Poland)</option>
+            <option value="pt-BR">Portuguese (Brazil)</option>
+            <option value="pt-PT">Portuguese (Portugal)</option>
+            <option value="ro-RO">Romanian (Romania)</option>
+            <option value="ru-RU">Russian (Russia)</option>
+            <option value="si-LK">Sinhala (Sri Lanka)</option>
+            <option value="sk-SK">Slovak (Slovakia)</option>
+            <option value="sl-SI">Slovenian (Slovenia)</option>
+            <option value="sq-AL">Albanian (Albania)</option>
+            <option value="sr-RS">Serbian (Serbia)</option>
+            <option value="su-ID">Sundanese (Indonesia)</option>
+            <option value="sv-SE">Swedish (Sweden)</option>
+            <option value="sw-KE">Swahili (Kenya)</option>
+            <option value="sw-TZ">Swahili (Tanzania)</option>
+            <option value="ta-IN">Tamil (India)</option>
+            <option value="ta-LK">Tamil (Sri Lanka)</option>
+            <option value="ta-MY">Tamil (Malaysia)</option>
+            <option value="ta-SG">Tamil (Singapore)</option>
+            <option value="te-IN">Telugu (India)</option>
+            <option value="th-TH">Thai (Thailand)</option>
+            <option value="tr-TR">Turkish (Turkey)</option>
+            <option value="uk-UA">Ukrainian (Ukraine)</option>
+            <option value="ur-IN">Urdu (India)</option>
+            <option value="ur-PK">Urdu (Pakistan)</option>
+            <option value="uz-UZ">Uzbek (Uzbekistan)</option>
+            <option value="vi-VN">Vietnamese (Vietnam)</option>
+            <option value="yue-HK">Cantonese (Hong Kong)</option>
+            <option value="zh-CN">Chinese (Simplified, China)</option>
+            <option value="zh-HK">Chinese (Traditional, Hong Kong)</option>
+            <option value="zh-TW">Chinese (Traditional, Taiwan)</option>
+            <option value="zu-ZA">Zulu (South Africa)</option>
+        </select>
         <div class="speech-status" id="speechStatus">Click the button to start speech recognition</div>
         <textarea class="speech-textbox" id="speechText" placeholder="Recognized speech will appear here..." readonly></textarea>
     </div>
@@ -299,56 +486,157 @@
             { english: "Feather", russian: "Перо", ukrainian: "Перо" }
         ];
 
-        // Speech Recognition Setup - moved to global scope
-        let recognition = null;
-        let isListening = false;
+        // Speech Recognition Setup
+        let recognitionInstances = {};
+        let isListening = {
+            'en-US': false,
+            'ru-RU': false,
+            'uk-UA': false
+        };
+        let supportedLanguages = ['en-US', 'ru-RU', 'uk-UA']; // English, Russian, Ukrainian
         
-        function setupSpeechRecognition() {
+        function toggleSingleLanguage(languageCode) {
+            // Toggle the state for this specific language
+            isListening[languageCode] = !isListening[languageCode];
+            
+            if (isListening[languageCode]) {
+                // Start this language
+                startRecognition(languageCode);
+                
+                // Update UI for this language button
+                document.getElementById(getLangButtonId(languageCode)).classList.add('listening');
+            } else {
+                // Stop this language
+                stopRecognition(languageCode);
+                
+                // Update UI for this language button
+                document.getElementById(getLangButtonId(languageCode)).classList.remove('listening');
+            }
+            
+            // Update main button state based on if any language is active
+            updateMainButtonState();
+        }
+        
+        function getLangButtonId(languageCode) {
+            const langCodes = {
+                'en-US': 'enButton',
+                'ru-RU': 'ruButton',
+                'uk-UA': 'ukButton'
+            };
+            return langCodes[languageCode] || '';
+        }
+        
+        function toggleAllRecognition() {
+            // Check if any language is currently listening
+            const anyListening = Object.values(isListening).some(status => status);
+            
+            if (anyListening) {
+                // Stop all
+                stopAllRecognition();
+            } else {
+                // Start all
+                supportedLanguages.forEach(lang => {
+                    isListening[lang] = true;
+                    startRecognition(lang);
+                    document.getElementById(getLangButtonId(lang)).classList.add('listening');
+                });
+                
+                // Update main button
+                document.getElementById('speechButton').classList.add('listening');
+                document.getElementById('speechButton').textContent = 'Stop All Recognition';
+            }
+        }
+        
+        function updateMainButtonState() {
+            const anyListening = Object.values(isListening).some(status => status);
+            
+            if (anyListening) {
+                document.getElementById('speechButton').classList.add('listening');
+                document.getElementById('speechButton').textContent = 'Stop All Recognition';
+            } else {
+                document.getElementById('speechButton').classList.remove('listening');
+                document.getElementById('speechButton').textContent = 'Start All Recognition';
+            }
+        }
+        
+        function changeLanguage() {
+            // Legacy function maintained for compatibility
+            const languageSelector = document.getElementById('languageSelector');
+            const selectedLanguage = languageSelector.value;
+            const languageName = languageSelector.options[languageSelector.selectedIndex].text;
+            
+            console.log(`Language dropdown changed to: ${selectedLanguage} (${languageName})`);
+            document.getElementById('speechStatus').textContent = `Selected: ${languageName} (use buttons to start/stop)`;
+        }
+        
+        function setupRecognitionForLanguage(languageCode) {
+            // Don't recreate if already exists
+            if (recognitionInstances[languageCode]) {
+                return;
+            }
+            
             try {
                 // Check browser support
                 if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
                     document.getElementById('speechStatus').textContent = 'Speech recognition is not supported in this browser';
                     document.getElementById('speechButton').disabled = true;
-                    return false;
+                    return;
                 }
                 
-                // Initialize the recognition object
+                // Create recognition instance for this language
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
+                const recognition = new SpeechRecognition();
                 
+                // Configure it
                 recognition.continuous = true;
                 recognition.interimResults = true;
-                recognition.lang = 'en-US'; // Default to English
                 recognition.maxAlternatives = 1;
+                recognition.lang = languageCode;
                 
+                // Get language name
+                const languageName = getLanguageName(languageCode);
+                
+                // Setup event handlers
                 recognition.onstart = function() {
-                    isListening = true;
-                    document.getElementById('speechButton').classList.add('listening');
-                    document.getElementById('speechButton').textContent = 'Stop Speech Recognition';
-                    document.getElementById('speechStatus').textContent = 'Listening...';
-                    console.log('Speech recognition started');
+                    console.log(`Recognition started for ${languageCode}`);
+                    isListening[languageCode] = true;
+                    document.getElementById(getLangButtonId(languageCode)).classList.add('listening');
+                    updateMainButtonState();
+                    document.getElementById('speechStatus').textContent = `Listening in: ${languageName}`;
                 };
                 
                 recognition.onend = function() {
-                    isListening = false;
-                    document.getElementById('speechButton').classList.remove('listening');
-                    document.getElementById('speechButton').textContent = 'Start Speech Recognition';
-                    document.getElementById('speechStatus').textContent = 'Speech recognition stopped';
-                    console.log('Speech recognition ended');
+                    console.log(`Recognition ended for ${languageCode}`);
+                    
+                    // Update language button UI
+                    isListening[languageCode] = false;
+                    document.getElementById(getLangButtonId(languageCode)).classList.remove('listening');
+                    updateMainButtonState();
+                    
+                    // If all stopped, update status
+                    if (!Object.values(isListening).some(status => status)) {
+                        document.getElementById('speechStatus').textContent = 'Speech recognition stopped';
+                    }
                 };
                 
                 recognition.onerror = function(event) {
-                    console.error('Speech recognition error:', event.error);
-                    document.getElementById('speechStatus').textContent = `Error: ${event.error}. Try again or check microphone permissions.`;
+                    console.error(`Speech recognition error in ${languageCode}:`, event.error);
                     
-                    // If permission denied, provide instructions
+                    // Update UI for errors
                     if (event.error === 'not-allowed') {
-                        document.getElementById('speechStatus').textContent = 'Microphone access denied. Please allow microphone access in your browser settings and try again.';
+                        document.getElementById('speechStatus').textContent = 
+                            `Microphone access denied for ${languageName}. Please allow and try again.`;
+                        isListening[languageCode] = false;
+                        document.getElementById(getLangButtonId(languageCode)).classList.remove('listening');
+                        updateMainButtonState();
+                    } else if (event.error !== 'aborted') {
+                        document.getElementById('speechStatus').textContent = `Error in ${languageName}: ${event.error}`;
                     }
                 };
                 
                 recognition.onresult = function(event) {
-                    console.log('Speech result received', event);
+                    console.log(`Speech result received in ${languageCode}`);
+                    
                     const speechText = document.getElementById('speechText');
                     let finalTranscript = '';
                     let interimTranscript = '';
@@ -363,45 +651,87 @@
                     }
                     
                     if (finalTranscript) {
-                        speechText.value += finalTranscript;
-                        console.log('Final transcript:', finalTranscript);
+                        const now = new Date();
+                        const timestamp = now.toLocaleTimeString();
+                        speechText.value += `[${timestamp}] [${languageName}] ${finalTranscript}\n`;
+                        
+                        // Auto-scroll to the bottom
+                        speechText.scrollTop = speechText.scrollHeight;
+                        
+                        console.log(`Final transcript in ${languageCode}:`, finalTranscript);
                     }
                     
-                    document.getElementById('speechStatus').textContent = interimTranscript ? 
-                        `Listening... (Interim: ${interimTranscript})` : 'Listening...';
+                    // Only update UI if this is the current language
+                    if (languageCode === currentLanguage) {
+                        document.getElementById('speechStatus').textContent = interimTranscript ? 
+                            `Listening in ${languageName}: ${interimTranscript}` : `Listening in: ${languageName}`;
+                    }
                 };
                 
-                return true;
+                // Store the instance
+                recognitionInstances[languageCode] = recognition;
+                
+                console.log(`Recognition instance created for ${languageCode}`);
             } catch (err) {
-                console.error('Error setting up speech recognition:', err);
-                document.getElementById('speechStatus').textContent = `Error initializing: ${err.message}`;
-                return false;
+                console.error(`Error setting up recognition for ${languageCode}:`, err);
             }
         }
         
-        function toggleSpeechRecognition() {
+        function getLanguageName(languageCode) {
+            const selector = document.getElementById('languageSelector');
+            for (let i = 0; i < selector.options.length; i++) {
+                if (selector.options[i].value === languageCode) {
+                    return selector.options[i].text;
+                }
+            }
+            return languageCode; // Fallback
+        }
+        
+        function startRecognition(languageCode) {
+            if (!recognitionInstances[languageCode]) {
+                setupRecognitionForLanguage(languageCode);
+            }
+            
             try {
-                if (!recognition) {
-                    if (!setupSpeechRecognition()) {
-                        return; // Setup failed
-                    }
-                }
-                
-                if (isListening) {
-                    recognition.stop();
-                    console.log('Stopping speech recognition');
-                } else {
-                    // Force a new instance to trigger permission request
-                    setupSpeechRecognition();
-                    recognition.start();
-                    console.log('Starting speech recognition');
-                }
+                recognitionInstances[languageCode].start();
+                console.log(`Started recognition for ${languageCode}`);
             } catch (err) {
-                console.error('Error toggling speech recognition:', err);
+                console.error(`Error starting recognition for ${languageCode}:`, err);
                 document.getElementById('speechStatus').textContent = `Error: ${err.message}`;
             }
         }
-
+        
+        function stopRecognition(languageCode) {
+            try {
+                if (recognitionInstances[languageCode]) {
+                    recognitionInstances[languageCode].stop();
+                    console.log(`Stopped recognition for ${languageCode}`);
+                }
+            } catch (err) {
+                console.error(`Error stopping recognition for ${languageCode}:`, err);
+            }
+        }
+        
+        function stopAllRecognition() {
+            Object.keys(recognitionInstances).forEach(lang => {
+                stopRecognition(lang);
+                isListening[lang] = false;
+                const buttonId = getLangButtonId(lang);
+                if (buttonId) {
+                    document.getElementById(buttonId).classList.remove('listening');
+                }
+            });
+            
+            // Update main button
+            document.getElementById('speechButton').classList.remove('listening');
+            document.getElementById('speechButton').textContent = 'Start All Recognition';
+        }
+        
+        function toggleSpeechRecognition() {
+            // Legacy function maintained for compatibility
+            toggleAllRecognition();
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.getElementById('translationTable');
             const tbody = table.querySelector('tbody');
@@ -505,8 +835,10 @@
                 });
             });
             
-            // Setup speech recognition but don't start it automatically
-            setupSpeechRecognition();
+            // Pre-create instances for the three main languages
+            supportedLanguages.forEach(lang => {
+                setupRecognitionForLanguage(lang);
+            });
         });
 
         function resetStorage() {
