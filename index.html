@@ -319,7 +319,8 @@
                     const columnIndex = parseInt(this.dataset.column);
                     
                     Array.from(tbody.getElementsByTagName('tr')).forEach(row => {
-                        const cell = row.cells[columnIndex];
+                        // Multiply columnIndex by 2 and add 1 to skip the indicator column
+                        const cell = row.cells[columnIndex * 2 + 1];
                         const cellText = cell.textContent.toLowerCase();
                         
                         if (cellText.includes(searchText)) {
