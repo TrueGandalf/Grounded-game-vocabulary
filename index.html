@@ -14,9 +14,32 @@
             padding: 8px 12px;
             text-align: left;
             border: 1px solid #ddd;
+            position: relative;
         }
         th {
             background-color: #f2f2f2;
+        }
+        .editable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .editable:hover {
+            background-color: #f8f8f8;
+        }
+        .status-indicator {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .status-original {
+            background-color: #4CAF50;
+        }
+        .status-modified {
+            background-color: #f44336;
         }
     </style>
 </head>
@@ -24,7 +47,7 @@
 
     <h1>Grounded Items Translation</h1>
     
-    <table>
+    <table id="translationTable">
         <thead>
             <tr>
                 <th>English</th>
@@ -305,6 +328,53 @@
             </tr>
         </tbody>
     </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.getElementById('translationTable');
+            const storageKey = 'groundedTranslations';
+            
+            // Load saved data from localStorage
+            let savedData = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            
+            // Make all cells editable except headers
+            const cells = table.getElementsByTagName('td');
+            Array.from(cells).forEach(cell => {
+                cell.classList.add('editable');
+                cell.contentEditable = true;
+                
+                // Add status indicator
+                const indicator = document.createElement('div');
+                indicator.classList.add('status-indicator');
+                cell.appendChild(indicator);
+                
+                // Check if cell has saved data
+                const cellId = `${cell.parentElement.rowIndex}-${cell.cellIndex}`;
+                if (savedData[cellId]) {
+                    cell.textContent = savedData[cellId];
+                    indicator.classList.add('status-modified');
+                } else {
+                    indicator.classList.add('status-original');
+                }
+                
+                // Save on blur
+                cell.addEventListener('blur', function() {
+                    const newValue = this.textContent.trim();
+                    const cellId = `${this.parentElement.rowIndex}-${this.cellIndex}`;
+                    
+                    if (newValue !== this.getAttribute('data-original')) {
+                        savedData[cellId] = newValue;
+                        localStorage.setItem(storageKey, JSON.stringify(savedData));
+                        this.querySelector('.status-indicator').classList.remove('status-original');
+                        this.querySelector('.status-indicator').classList.add('status-modified');
+                    }
+                });
+                
+                // Store original value
+                cell.setAttribute('data-original', cell.textContent);
+            });
+        });
+    </script>
 
 </body>
 </html>
